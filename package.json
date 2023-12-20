@@ -17,6 +17,8 @@
     "bwip-js": "^3.0.5",
     "classnames": "^2.3.1",
     "concurrently": "^7.2.1",
+    "cross-env": "^7.0.3",
+    "csv-parse": "^5.5.3",
     "dexie": "^3.2.2",
     "dexie-export-import": "^1.0.3",
     "electron-devtools-installer": "^3.2.0",
@@ -74,11 +76,12 @@
     }
   ],
   "scripts": {
-    "start": "BROWSER=none react-scripts start",
+    "why": "concurrently \"cross-env BROWSER=none npm run react-start\" \"wait-on http://127.0.0.1:3000 && electron .\"",
+    "react-start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "electron:dev": "concurrently \"npm run start\" \"wait-on http://localhost:3000 && electron .\"",
+    "electron:dev": "concurrently -k \"npm run start\" \"wait-on http://localhost:3000 && electron .\"",
     "electron:pack-mac": "npm run build && electron-builder --dir",
     "electron:dist": "npm run build && electron-builder --win --x64"
   },

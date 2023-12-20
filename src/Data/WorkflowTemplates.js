@@ -89,10 +89,10 @@ let WorkflowTemplates = [
         label: "Total Units",
         type: "number",
         magic: {
-            type: "multiply",
-            args: ["unitspercarton", "cartons"],
+          type: "multiply",
+          args: ["unitspercarton", "cartons"],
         },
-        hidden: true
+        hidden: true,
       },
       {
         id: "location",
@@ -173,7 +173,47 @@ let WorkflowTemplates = [
         type: "text",
         initialValue: "",
         placeholder: "",
-      }
+      },
+    ],
+  },
+  {
+    name: "Dest Label Matching",
+    id: "gates-rec",
+    submissionFields: [
+      {
+        id: "postal-code",
+        label: "Postal Code",
+        type: "text",
+        initialValue: "",
+        placeholder: "",
+      },
+      {
+        id: "onhand",
+        label: "Onhand",
+        type: "text",
+        initialValue: "",
+        placeholder: "",
+      },
+      {
+        id: "onhand-dest",
+        label: "Onhand Destination",
+        type: "text",
+        initialValue: "",
+        magic: {
+          type: "dataMatch",
+          args: ["postal-code", "onhand"],
+        },
+      },
+      {
+        id: "matches",
+        label: "Matches",
+        type: "text",
+        initialValue: "",
+        magic: {
+          type: "fuzzyMatch",
+          args: ["postal-code", "onhand-dest"],
+        },
+      },
     ],
   },
 ];

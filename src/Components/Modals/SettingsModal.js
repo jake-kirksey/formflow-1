@@ -1,91 +1,129 @@
-import {Dialog} from "@headlessui/react";
-import NiceModal, {useModal} from "@ebay/nice-modal-react";
+import { Dialog } from "@headlessui/react";
+import NiceModal, { useModal } from "@ebay/nice-modal-react";
 import React from "react";
 import ModalWrapper from "./ModalWrapper";
-import {useDispatch, useSelector} from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import settingsSlice from "../../Redux/settingsSlice";
 import classNames from "classnames";
-import {XIcon} from "@heroicons/react/solid";
+import { XIcon } from "@heroicons/react/solid";
 
 function SettingsItem(props) {
-    return <div className={classNames("rounded-md bg-gray-50 px-6 py-5 flex items-start sm:justify-between", props.value ? "bg-gray-50" : "bg-red-50")}>
-        <div className="flex items-start ">
-            <div className="mt-0">
-                <div className="text-sm font-medium text-gray-900">{props.title}</div>
-                <div className="mt-1 text-xs text-gray-600">
-                    <div>{props.value ?? "Not set"}</div>
-                </div>
-            </div>
+  return (
+    <div
+      className={classNames(
+        "rounded-md bg-gray-50 px-6 py-5 flex items-start sm:justify-between",
+        props.value ? "bg-gray-50" : "bg-red-50"
+      )}
+    >
+      <div className="flex items-start ">
+        <div className="mt-0">
+          <div className="text-sm font-medium text-gray-900">{props.title}</div>
+          <div className="mt-1 text-xs text-gray-600">
+            <div>{props.value ?? "Not set"}</div>
+          </div>
         </div>
-        <div className="mt-0 ml-6 flex-shrink-0">
-            <button
-                type="button"
-                className="inline-flex items-center px-4 py-2 border shadow-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 hover:scale-105 hover:shadow-md transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:text-sm"
-                onClick={props.onClick}
-            >
-                Edit
-            </button>
-        </div>
-    </div>;
+      </div>
+      <div className="mt-0 ml-6 flex-shrink-0">
+        <button
+          type="button"
+          className="inline-flex items-center px-4 py-2 border shadow-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 hover:scale-105 hover:shadow-md transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:text-sm"
+          onClick={props.onClick}
+        >
+          Edit
+        </button>
+      </div>
+    </div>
+  );
 }
 
 export default NiceModal.create(() => {
-    const modal = useModal();
-    const settings = useSelector((state) => state.settings);
-    const dispatch = useDispatch();
-    const closable = settings.barcodeSaveLocation && settings.workflowSaveLocation
+  const modal = useModal();
+  const settings = useSelector((state) => state.settings);
+  const dispatch = useDispatch();
+  const closable =
+    settings.barcodeSaveLocation && settings.workflowSaveLocation;
   return (
     <>
-        <ModalWrapper
-            visible={modal.visible}
-            hideModal={() => {if(closable) {
-                    modal.hide();
-                }}
-            }
-        >
-            <Dialog.Panel
-                className="relative bg-white rounded-lg p-4 text-left shadow-xl transform transition-all sm:my-8 sm:max-w-xl sm:w-full sm:p-6">
-                <button
-                    onClick={ () => {
-                        if(closable) {
-                            modal.hide();
-                        }
-                    } }
-                    className={classNames("absolute -right-3 -top-3 bg-gray-500 rounded-lg p-1 shadow-lg hover:bg-red-500 hover:scale-125 transition-all", closable ? "visible" : "hidden")}
-                >
-                    <XIcon className={"text-white"} width={24}/>
-                </button>
-                <div className="mt-3 text-center sm:mt-0 sm:text-left">
-                    <Dialog.Title
-                        as="h3"
-                        className="text-lg leading-6 font-medium text-gray-900"
-                    >
-                        Settings
-                    </Dialog.Title>
-                    <div className="mt-2">
-                        <div className="mt-5 space-y-4">
-                            <SettingsItem title={"Barcode Save Location"} value={settings.barcodeSaveLocation} onClick={async () => {
-                                let location = await window.electronAPI.selectFolder();
-                                if (location) {
-                                    dispatch(settingsSlice.actions.set({
-                                        ...settings,
-                                        barcodeSaveLocation: location
-                                    }));
-                                }
-                            }}/>
-                            <SettingsItem title={"Workflow Save Location"} value={settings.workflowSaveLocation} onClick={async () => {
-                                let location = await window.electronAPI.selectFolder();
-                                if (location) {
-                                    dispatch(settingsSlice.actions.set({
-                                        ...settings,
-                                        workflowSaveLocation: location
-                                    }));
-                                }
-                            }}/>
-                        </div>
-                    </div>
-                </div>
-                {/*
+      <ModalWrapper
+        visible={modal.visible}
+        hideModal={() => {
+          if (closable) {
+            modal.hide();
+          }
+        }}
+      >
+        <Dialog.Panel className="relative bg-white rounded-lg p-4 text-left shadow-xl transform transition-all sm:my-8 sm:max-w-xl sm:w-full sm:p-6">
+          <button
+            onClick={() => {
+              if (closable) {
+                modal.hide();
+              }
+            }}
+            className={classNames(
+              "absolute -right-3 -top-3 bg-gray-500 rounded-lg p-1 shadow-lg hover:bg-red-500 hover:scale-125 transition-all",
+              closable ? "visible" : "hidden"
+            )}
+          >
+            <XIcon className={"text-white"} width={24} />
+          </button>
+          <div className="mt-3 text-center sm:mt-0 sm:text-left">
+            <Dialog.Title
+              as="h3"
+              className="text-lg leading-6 font-medium text-gray-900"
+            >
+              Settings
+            </Dialog.Title>
+            <div className="mt-2">
+              <div className="mt-5 space-y-4">
+                <SettingsItem
+                  title={"Barcode Save Location"}
+                  value={settings.barcodeSaveLocation}
+                  onClick={async () => {
+                    let location = await window.electronAPI.selectFolder();
+                    if (location) {
+                      dispatch(
+                        settingsSlice.actions.set({
+                          ...settings,
+                          barcodeSaveLocation: location,
+                        })
+                      );
+                    }
+                  }}
+                />
+                <SettingsItem
+                  title={"Workflow Save Location"}
+                  value={settings.workflowSaveLocation}
+                  onClick={async () => {
+                    let location = await window.electronAPI.selectFolder();
+                    if (location) {
+                      dispatch(
+                        settingsSlice.actions.set({
+                          ...settings,
+                          workflowSaveLocation: location,
+                        })
+                      );
+                    }
+                  }}
+                />
+                <SettingsItem
+                  title={"Input Data Location"}
+                  value={settings.inputDataLocation}
+                  onClick={async () => {
+                    let location = await window.electronAPI.selectFolder();
+                    if (location) {
+                      dispatch(
+                        settingsSlice.actions.set({
+                          ...settings,
+                          inputDataLocation: location,
+                        })
+                      );
+                    }
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+          {/*
           <div className="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse">
             <button
               type="button"
@@ -104,8 +142,8 @@ export default NiceModal.create(() => {
               Cancel
             </button>
           </div>*/}
-            </Dialog.Panel>
-        </ModalWrapper>
+        </Dialog.Panel>
+      </ModalWrapper>
     </>
   );
 });
