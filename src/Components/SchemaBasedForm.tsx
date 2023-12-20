@@ -1,28 +1,31 @@
-import {Field, Form, Formik, FormikValues} from "formik";
-import React, {useRef} from "react";
+import { Field, Form, Formik, FormikValues } from "formik";
+import React, { useRef } from "react";
 import classNames from "classnames";
 // @ts-ignore
 import levenshtein from "fast-levenshtein";
 // @ts-ignore
-import {LocationCombobox} from "./LocationCombobox";
+import { LocationCombobox } from "./LocationCombobox";
 
 interface MagicSchema {
-  args: string[]
-  type: string | boolean
+  args: string[];
+  type: string | boolean;
 }
 interface FieldSchema {
-  options?: {label: string, value: string}[];
+  options?: { label: string; value: string }[];
   units?: any;
   optional?: Boolean;
-    id: string
-    label: string
-    type: string
-    initialValue?: any
-    placeholder?: string
-    magic?: MagicSchema
-  hidden?: boolean
+  id: string;
+  label: string;
+  type: string;
+  initialValue?: any;
+  placeholder?: string;
+  magic?: MagicSchema;
+  hidden?: boolean;
 }
-export function evaluateMagicField(field: { magic: MagicSchema, id: string }, values: FormikValues) {
+export function evaluateMagicField(
+  field: { magic: MagicSchema; id: string },
+  values: FormikValues
+) {
   // Check that all expected arguments have a value in the values array; otherwise, throw an error.
 
   // Filter magic args to only those that are defined in the values array.
@@ -53,9 +56,13 @@ export function evaluateMagicField(field: { magic: MagicSchema, id: string }, va
       } else {
         return true;
       }
+    // case "dataLookup":
+    // TODO: Function to take a read file and compare against the lookup value
+    // Given an input file find the value in the csv and return the value in the next column
+    //
     case "multiply":
-        // Multiply expects two arguments and returns the product of them.
-        return values[field.magic.args[0]] * values[field.magic.args[1]];
+      // Multiply expects two arguments and returns the product of them.
+      return values[field.magic.args[0]] * values[field.magic.args[1]];
     default:
       throw new Error(
         `Unknown magic type: ${field.magic.type} in field ${field.id}`
@@ -63,8 +70,12 @@ export function evaluateMagicField(field: { magic: MagicSchema, id: string }, va
   }
 }
 
-function SchemaBasedForm(props: { fields: FieldSchema[]; submissionCallback: (arg0: { [p: string]: any; timestamp: string }) => void; submitButtonText?: string }) {
-  let initialValues : {[key: string]: string;} = {};
+function SchemaBasedForm(props: {
+  fields: FieldSchema[];
+  submissionCallback: (arg0: { [p: string]: any; timestamp: string }) => void;
+  submitButtonText?: string;
+}) {
+  let initialValues: { [key: string]: string } = {};
   const firstFormFieldRef = useRef(null);
   props.fields.forEach((field) => {
     initialValues[field.id] = field.initialValue;
@@ -75,7 +86,7 @@ function SchemaBasedForm(props: { fields: FieldSchema[]; submissionCallback: (ar
     <Formik
       initialValues={initialValues}
       validate={(values) => {
-        const errors : {[key: string]: string} = {};
+        const errors: { [key: string]: string } = {};
         // For each field in the schema, we need to check if it's in an error state.
         props.fields.forEach((field) => {
           // The field only requires user input if it's not optional or magic.
@@ -172,7 +183,10 @@ function SchemaBasedForm(props: { fields: FieldSchema[]; submissionCallback: (ar
                   <div key={index}>
                     <label
                       htmlFor={field.id}
-                      className={classNames("block text-md font-bold text-gray-700", field.hidden && "hidden")}
+                      className={classNames(
+                        "block text-md font-bold text-gray-700",
+                        field.hidden && "hidden"
+                      )}
                     >
                       {field.label}
                       <div className={"flex"}>
@@ -191,7 +205,10 @@ function SchemaBasedForm(props: { fields: FieldSchema[]; submissionCallback: (ar
                           onKeyDown={
                             normalFields.indexOf(field) ===
                             normalFields.length - 1
-                              ? (e: { key: string; preventDefault: () => void; }) => {
+                              ? (e: {
+                                  key: string;
+                                  preventDefault: () => void;
+                                }) => {
                                   if (e.key === "Tab") {
                                     e.preventDefault();
                                     submitForm();
@@ -209,8 +226,8 @@ function SchemaBasedForm(props: { fields: FieldSchema[]; submissionCallback: (ar
                           {
                             // If the field is a select, we also need to add the options.
                             field.type === "select"
-                                // @ts-ignore
-                              ? field.options.map((option) => (
+                              ? // @ts-ignore
+                                field.options.map((option) => (
                                   <option
                                     key={option.value}
                                     value={option.value}
@@ -241,20 +258,22 @@ function SchemaBasedForm(props: { fields: FieldSchema[]; submissionCallback: (ar
                       {field.label}
                     </label>
                     <div className={classNames(formFieldClass)}>
-                      { // @ts-ignore
+                      {
+                        // @ts-ignore
                         field.options.map((option, index) => (
-                        <label key={index}>
-                          <Field
-                            type="checkbox"
-                            // The name should be the same across all options in this group
-                            name={field.id}
-                            // The value varies based on the option
-                            value={option.value}
-                            className={"mr-1"}
-                          />
-                          {option.label}
-                        </label>
-                      ))}
+                          <label key={index}>
+                            <Field
+                              type="checkbox"
+                              // The name should be the same across all options in this group
+                              name={field.id}
+                              // The value varies based on the option
+                              value={option.value}
+                              className={"mr-1"}
+                            />
+                            {option.label}
+                          </label>
+                        ))
+                      }
                     </div>
                   </div>
                 );

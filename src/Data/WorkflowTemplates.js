@@ -200,7 +200,7 @@ let WorkflowTemplates = [
         type: "text",
         initialValue: "",
         magic: {
-          type: "dataMatch",
+          type: "dataLookup",
           args: ["postal-code", "onhand"],
         },
       },
