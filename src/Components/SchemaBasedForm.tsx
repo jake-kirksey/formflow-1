@@ -4,7 +4,8 @@ import classNames from "classnames";
 // @ts-ignore
 import levenshtein from "fast-levenshtein";
 // @ts-ignore
-import { LocationCombobox } from "./LocationCombobox";
+// import { LocationCombobox } from "./LocationCombobox";
+// import { useSelector } from "react-redux";
 
 interface MagicSchema {
   args: string[];
@@ -22,9 +23,11 @@ interface FieldSchema {
   magic?: MagicSchema;
   hidden?: boolean;
 }
+
 export function evaluateMagicField(
   field: { magic: MagicSchema; id: string },
-  values: FormikValues
+  values: FormikValues,
+  csvData: any[]
 ) {
   // Check that all expected arguments have a value in the values array; otherwise, throw an error.
 
@@ -56,10 +59,20 @@ export function evaluateMagicField(
       } else {
         return true;
       }
-    // case "dataLookup":
-    // TODO: Function to take a read file and compare against the lookup value
-    // Given an input file find the value in the csv and return the value in the next column
-    //
+    case "dataLookup":
+      if (csvData && csvData.length > 0) {
+        const lookupValue = values[field.magic.args[0]];
+        console.log(values[field.magic.args[0]]);
+        // Implement your lookup logic here by searching csvData for a match
+        const matchedData = csvData.find(
+          (data: { someField: any }) => data.someField === lookupValue
+        );
+
+        return matchedData ? matchedData : "No match found";
+      } else {
+        return "No data available for lookup";
+      }
+
     case "multiply":
       // Multiply expects two arguments and returns the product of them.
       return values[field.magic.args[0]] * values[field.magic.args[1]];
@@ -74,6 +87,7 @@ function SchemaBasedForm(props: {
   fields: FieldSchema[];
   submissionCallback: (arg0: { [p: string]: any; timestamp: string }) => void;
   submitButtonText?: string;
+  csvData: any[];
 }) {
   let initialValues: { [key: string]: string } = {};
   const firstFormFieldRef = useRef(null);

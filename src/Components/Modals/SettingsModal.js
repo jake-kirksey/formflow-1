@@ -109,7 +109,7 @@ export default NiceModal.create(() => {
                   title={"Input Data Location"}
                   value={settings.inputDataLocation}
                   onClick={async () => {
-                    let location = await window.electronAPI.selectFolder();
+                    let location = await window.electronAPI.selectFile();
                     if (location) {
                       dispatch(
                         settingsSlice.actions.set({

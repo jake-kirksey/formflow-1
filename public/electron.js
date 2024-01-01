@@ -1,24 +1,21 @@
+// import Papa from "papaparse";
 const {
   default: installExtension,
   REACT_DEVELOPER_TOOLS,
-    REDUX_DEVTOOLS,
+  REDUX_DEVTOOLS,
 } = require("electron-devtools-installer");
 const extensionOptions = {
   loadExtensionOptions: { allowFileAccess: true },
 };
 // Module to control the application lifecycle and the native browser window.
-const {
-  app,
-  BrowserWindow,
-  ipcMain,
-  dialog
-} = require("electron");
+const { app, BrowserWindow, ipcMain, dialog } = require("electron");
 const path = require("path");
 const url = require("url");
-const { autoUpdater } = require("electron-updater")
+const { autoUpdater } = require("electron-updater");
 const log = require("electron-log");
 const version = require("../package.json").version;
 const jetpack = require("fs-jetpack");
+const fs = require("fs").promises;
 
 app.setAboutPanelOptions({
   iconPath: path.join(__dirname, "..", "assets", "icon.png"),
@@ -26,7 +23,6 @@ app.setAboutPanelOptions({
   applicationVersion: version,
   version: version,
 });
-
 
 function installElectronDevToolExtensions() {
   if (process.env.NODE_ENV !== "production") {
@@ -39,8 +35,8 @@ function installElectronDevToolExtensions() {
       });
     } catch (err) {
       console.warn(
-          "An error occurred while trying to add an extension:\n",
-          err
+        "An error occurred while trying to add an extension:\n",
+        err
       );
     }
   }
@@ -52,8 +48,9 @@ function createWindow() {
     width: 1200,
     height: 800,
     webPreferences: {
-      preload: path.join(__dirname, 'preload.js')
-    }
+      preload: path.join(__dirname, "preload.js"),
+      nodeIntegration: false,
+    },
   });
 
   // In production, set the initial browser path to the local bundle generated
@@ -61,12 +58,12 @@ function createWindow() {
   // In development, set it to localhost to allow live/hot-reloading.
 
   const appURL = app.isPackaged
-      ? url.format({
+    ? url.format({
         pathname: path.join(__dirname, "..", "build", "index.html"),
         protocol: "file:",
         slashes: true,
       })
-      : "http://localhost:3000";
+    : "http://localhost:3000";
   mainWindow.loadURL(appURL);
 
   // Automatically open Chrome's DevTools in development mode.
@@ -81,53 +78,72 @@ function createWindow() {
 // is ready to create the browser windows.
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
-
-  ipcMain.handle('selectFolder', async () => {
+  ipcMain.handle("selectFolder", async () => {
     let result = await dialog.showOpenDialog({
-      properties: ['openDirectory']
-    })
-    if(result.canceled){
+      properties: ["openDirectory"],
+    });
+    if (result.canceled) {
       return null;
     }
-    if(result.filePaths.length === 0){
+    if (result.filePaths.length === 0) {
       return null;
     }
     return result.filePaths[0];
   });
 
-  ipcMain.handle('saveFile', async(event, args) => {
+  ipcMain.handle("readCSVFile", async (event, filePath) => {
+    try {
+      const csvData = await fs.readFile(filePath, "utf-8");
+      return csvData;
+    } catch (error) {
+      throw new Error(`Error reading CSV file: ${error.message}`);
+    }
+  });
+
+  ipcMain.handle("saveFile", async (event, args) => {
     // check if file exists
     let fileExists = jetpack.exists(args[0]);
 
     // break if the file exists already and the user doesn't want to overwrite it
-    if(fileExists){
-        let result = await dialog.showMessageBox({
-            type: 'warning',
-            title: 'File already exists',
-            message: `A file already exists at ${args[0]}. Do you want to overwrite it?`,
-            buttons: ['Yes', 'No']
-        });
-        if(result.response === 1){
-            return false;
-        }
+    if (fileExists) {
+      let result = await dialog.showMessageBox({
+        type: "warning",
+        title: "File already exists",
+        message: `A file already exists at ${args[0]}. Do you want to overwrite it?`,
+        buttons: ["Yes", "No"],
+      });
+      if (result.response === 1) {
+        return false;
+      }
     }
 
     // write the file
     try {
       jetpack.write(args[0], args[1]);
-    }catch(e){
+    } catch (e) {
       return false;
     }
 
     // check if file was saved successfully
-    let fileSavedSuccess = (jetpack.exists(args[0]) === "file");
+    let fileSavedSuccess = jetpack.exists(args[0]) === "file";
     return fileSavedSuccess;
   });
 
-  const log = require("electron-log")
-  log.transports.file.level = "debug"
-  autoUpdater.logger = log
-  autoUpdater.checkForUpdatesAndNotify()
+  ipcMain.handle("selectFile", async () => {
+    const result = await dialog.showOpenDialog({
+      properties: ["openFile"],
+      filters: [
+        { name: "CSV Files", extensions: ["csv"] },
+        // Add more filters if needed
+      ],
+    });
+    return result.filePaths;
+  });
+
+  const log = require("electron-log");
+  log.transports.file.level = "debug";
+  autoUpdater.logger = log;
+  autoUpdater.checkForUpdatesAndNotify();
   installElectronDevToolExtensions();
   createWindow();
 });
