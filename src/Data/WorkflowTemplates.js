@@ -177,8 +177,8 @@ let WorkflowTemplates = [
     ],
   },
   {
-    name: "Dest Label Matching",
-    id: "gates-rec",
+    name: "Dest Zip Matching",
+    id: "zip-match",
     submissionFields: [
       {
         id: "postal-code",
@@ -204,16 +204,16 @@ let WorkflowTemplates = [
           args: ["postal-code", "onhand"],
         },
       },
-      {
-        id: "matches",
-        label: "Matches",
-        type: "text",
-        initialValue: "",
-        magic: {
-          type: "fuzzyMatch",
-          args: ["postal-code", "onhand-dest"],
-        },
-      },
+      // {
+      //   id: "matches",
+      //   label: "Matches",
+      //   type: "text",
+      //   initialValue: "",
+      //   magic: {
+      //     type: "fuzzyMatch",
+      //     args: ["postal-code", "onhand-dest"],
+      //   },
+      // },
     ],
   },
 ];

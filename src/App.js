@@ -12,6 +12,7 @@ import { useDispatch, useSelector } from "react-redux";
 import submissionsSlice from "./Redux/submissionsSlice";
 import metadataSlice from "./Redux/metadataSlice";
 import workflowSlice from "./Redux/workflowSlice";
+import csvDataSlice from "./Redux/csvDataSlice";
 import { setCSVData } from "./Redux/csvDataSlice";
 import * as Sentry from "@sentry/react";
 import { ToastContainer } from "react-toastify";
@@ -59,8 +60,9 @@ function App() {
   const metadata = useSelector((state) => state.metadata);
   const workflow = useSelector((state) => state.workflow);
   const settings = useSelector((state) => state.settings);
-  const csvData = useSelector((state) => state.csvData);
+  const data = useSelector((state) => state.data);
 
+  // console.log("app: ", data);
   useEffect(() => {
     if (
       !settings.workflowSaveLocation ||
@@ -80,8 +82,11 @@ function App() {
     async function fetchCSVData() {
       try {
         if (settings.inputDataLocation) {
-          const csvData = await readCSVFile(settings.inputDataLocation);
-          dispatch(setCSVData(csvData)); // Dispatch the CSV data to Redux state
+          const csvData = await window.electronAPI.readCSVFile(
+            settings.inputDataLocation
+          );
+          console.log("App UseEffect:", csvData);
+          dispatch(csvDataSlice.actions.setCSVData(csvData)); // Dispatch the CSV data to Redux state
         }
       } catch (error) {
         console.error("Error fetching CSV data:", error);
@@ -105,18 +110,6 @@ function App() {
       }.csv`,
       Papa.unparse(results)
     );
-  }
-  // BUG: There is an issue here where i cannot communicated using the ipcRender. I believe it is due to the webpack 5 which is blocked for security reasons. Even exposing the readCSVFile i can see that the frunction enters but not getting any results.
-  async function readCSVFile(filePath) {
-    try {
-      console.log("I am in the readCSVFile");
-      // const csvData = await ipcRenderer.invoke("readCSVFile", filePath);
-      const csvData = await window.electronAPI.readCSVFile(filePath);
-      console.log(csvData);
-      return csvData;
-    } catch (error) {
-      throw new Error(`Error reading CSV file: ${error.message}`);
-    }
   }
 
   return (

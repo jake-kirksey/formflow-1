@@ -1,11 +1,13 @@
 import { Field, Form, Formik, FormikValues } from "formik";
 import React, { useRef } from "react";
+import { useSelector } from "react-redux";
 import classNames from "classnames";
 // @ts-ignore
 import levenshtein from "fast-levenshtein";
 // @ts-ignore
 // import { LocationCombobox } from "./LocationCombobox";
 // import { useSelector } from "react-redux";
+// import useCSVData from "../Data/csvData";
 
 interface MagicSchema {
   args: string[];
@@ -29,6 +31,8 @@ export function evaluateMagicField(
   values: FormikValues,
   csvData: any[]
 ) {
+  // const csvDataArray = Object.values(csvData);
+
   // Check that all expected arguments have a value in the values array; otherwise, throw an error.
 
   // Filter magic args to only those that are defined in the values array.
@@ -60,18 +64,19 @@ export function evaluateMagicField(
         return true;
       }
     case "dataLookup":
-      if (csvData && csvData.length > 0) {
-        const lookupValue = values[field.magic.args[0]];
-        console.log(values[field.magic.args[0]]);
-        // Implement your lookup logic here by searching csvData for a match
-        const matchedData = csvData.find(
-          (data: { someField: any }) => data.someField === lookupValue
-        );
+      console.log("Zip:", values[field.magic.args[0]]);
+      console.log("Ref #:", values[field.magic.args[1]]);
+      // const lookupValue = values[field.magic.args[1]];
+      // console.log("LookupValue: ", lookupValue);
+      console.log("CSVData:", csvData);
+      console.log("Type of CSvDataaRRY:", typeof csvData);
 
-        return matchedData ? matchedData : "No match found";
-      } else {
-        return "No data available for lookup";
-      }
+      // const foundItem = csvData.find((item) => {
+      //   console.log("Item Onhand:", item.Onhand);
+      //   console.log("test: ", item);
+      // });
+      // console.log(foundItem);
+      return "No match found";
 
     case "multiply":
       // Multiply expects two arguments and returns the product of them.
@@ -87,7 +92,6 @@ function SchemaBasedForm(props: {
   fields: FieldSchema[];
   submissionCallback: (arg0: { [p: string]: any; timestamp: string }) => void;
   submitButtonText?: string;
-  csvData: any[];
 }) {
   let initialValues: { [key: string]: string } = {};
   const firstFormFieldRef = useRef(null);
@@ -95,6 +99,10 @@ function SchemaBasedForm(props: {
     initialValues[field.id] = field.initialValue;
   });
   let normalFields = props.fields.filter((field) => !field.magic);
+
+  const data = useSelector((state: any) => state.data);
+
+  // console.log("SchemaBasedForm: ", data);
 
   return (
     <Formik
@@ -166,7 +174,7 @@ function SchemaBasedForm(props: {
                 let magicValue;
                 try {
                   // @ts-ignore
-                  magicValue = evaluateMagicField(field, values);
+                  magicValue = evaluateMagicField(field, values, data);
                 } catch (error) {
                   // if the magic field fails to evaluate, we'll just set it as empty and not log an error.
                   magicValue = "";
